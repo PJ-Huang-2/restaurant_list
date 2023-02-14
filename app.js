@@ -19,11 +19,36 @@ app.get("/", (req, res) => {
   res.render("index", { restaurant: restaurantList.results });
 });
 
-app.get("/restaurant/:id", (req, res) => {
+app.get("/restaurants/:id", (req, res) => {
   const restaurant = restaurantList.results.find((store) => {
     return store.id === Number(req.params.id);
   });
   res.render("show", { restaurant: restaurant });
+});
+
+app.get("/search", (req, res) => {
+  const keyword = req.query.keyword;
+  const keywordLowerCase = keyword.toLowerCase().split(" ").join(" ");
+
+  // search restaurant name
+  const restaurant = restaurantList.results.filter((store) => {
+    const storeLowerCase = store.name.toLowerCase();
+    const categoryLowerCase = store.category.toLowerCase();
+    const locationLowerCase = store.location.toLowerCase();
+    return (
+      storeLowerCase.includes(keywordLowerCase) ||
+      categoryLowerCase.includes(keywordLowerCase) ||
+      locationLowerCase.includes(keywordLowerCase)
+    );
+  });
+  const noSearchResult =
+    restaurant.length === 0 ? "查詢不到相關結果，請嘗試搜尋其他關鍵字" : null;
+  // 差搜尋沒有結果時也有對應頁面提示
+  res.render("index", {
+    restaurant: restaurant,
+    keyword: keyword,
+    noSearchResult: noSearchResult,
+  });
 });
 
 // start and listen on the Express server
